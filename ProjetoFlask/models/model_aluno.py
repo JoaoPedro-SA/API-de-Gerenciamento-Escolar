@@ -1,119 +1,143 @@
 import sqlite3
-from flask import jsonify, request
 
-# Função para conectar ao banco de dados
+from flask import jsonify
+from config import banco_de_dados
+
+
 def conectar_banco():
-    conexao = sqlite3.connect("banco_de_dados.db")
-    conexao.row_factory = sqlite3.Row  # Permite acessar os resultados como dicionários
+    conexao = sqlite3.connect(banco_de_dados)
+    conexao.execute("PRAGMA foreign_keys = ON")
+    conexao.row_factory = sqlite3.Row
     return conexao
 
-# Adicionar um novo aluno
 
-def adiciona_aluno(aluno):
-    # Validate JSON payload
+def _validar_aluno(aluno):
     if not aluno:
-        return jsonify({"erro": "JSON inválido ou ausente"}), 400
+        return "JSON invalido ou ausente"
 
-    campos_obrigatorios = ['nome', 'idade', 'turma_id', 'nota_primeiro_semestre', 'nota_segundo_semestre']
-    for campo in campos_obrigatorios:
+    campos = ["nome", "idade", "turma_id", "nota_primeiro_semestre", "nota_segundo_semestre"]
+    for campo in campos:
         if campo not in aluno:
-            return jsonify({"erro": f"Campo obrigatório ausente: {campo}"}), 400
+            return f"Campo obrigatorio ausente: {campo}"
 
     try:
-        idade = int(aluno['idade'])
-        turma_id = int(aluno['turma_id'])
-        nota1 = float(aluno['nota_primeiro_semestre'])
-        nota2 = float(aluno['nota_segundo_semestre'])
-        media_final = (nota1 + nota2) / 2
-    except ValueError:
-        return jsonify({"erro": "Idade, turma_id e notas devem ser números válidos"}), 400
+        idade = int(aluno["idade"])
+        turma_id = int(aluno["turma_id"])
+        nota1 = float(aluno["nota_primeiro_semestre"])
+        nota2 = float(aluno["nota_segundo_semestre"])
+    except (TypeError, ValueError):
+        return "Idade, turma_id e notas devem ser numeros validos"
+
+    return {
+        "nome": aluno["nome"],
+        "idade": idade,
+        "turma_id": turma_id,
+        "nota_primeiro_semestre": nota1,
+        "nota_segundo_semestre": nota2,
+        "media_final": (nota1 + nota2) / 2,
+    }
+
+
+def adiciona_aluno(aluno):
+    dados = _validar_aluno(aluno)
+    if isinstance(dados, str):
+        return jsonify({"erro": dados}), 400
 
     conexao = conectar_banco()
     cursor = conexao.cursor()
-
     try:
-        cursor.execute('''
-            INSERT INTO alunos (nome, idade, turma_id, nota_primeiro_semestre, nota_segundo_semestre, media_final)
+        cursor.execute(
+            """
+            INSERT INTO alunos
+                (nome, idade, turma_id, nota_primeiro_semestre, nota_segundo_semestre, media_final)
             VALUES (?, ?, ?, ?, ?, ?)
-        ''', (aluno['nome'], idade, turma_id, nota1, nota2, media_final))
-
+            """,
+            (
+                dados["nome"],
+                dados["idade"],
+                dados["turma_id"],
+                dados["nota_primeiro_semestre"],
+                dados["nota_segundo_semestre"],
+                dados["media_final"],
+            ),
+        )
         conexao.commit()
-        aluno_id = cursor.lastrowid
-
-    except sqlite3.Error as e:
+        dados["id"] = cursor.lastrowid
+        return jsonify(dados), 201
+    except sqlite3.IntegrityError as e:
         conexao.rollback()
-        return jsonify({"erro": f"Erro ao inserir no banco de dados: {str(e)}"}), 500
-
+        return jsonify({"erro": "Turma informada nao existe", "detalhe": str(e)}), 409
     finally:
         conexao.close()
 
-    aluno['id'] = aluno_id
-    aluno['media_final'] = media_final
-    return jsonify(aluno), 201
 
-# Listar todos os alunos
 def lista_alunos():
     conexao = conectar_banco()
     cursor = conexao.cursor()
+    try:
+        cursor.execute("SELECT * FROM alunos")
+        return jsonify([dict(row) for row in cursor.fetchall()])
+    finally:
+        conexao.close()
 
-    # Consulta todos os alunos
-    cursor.execute('SELECT * FROM alunos')
-    alunos = [dict(row) for row in cursor.fetchall()]  # Converte os resultados em uma lista de dicionários
-    conexao.close()
 
-    return jsonify(alunos)
-
-# Consultar um aluno por ID
 def consulta_aluno(aluno_id):
     conexao = conectar_banco()
     cursor = conexao.cursor()
+    try:
+        cursor.execute("SELECT * FROM alunos WHERE id = ?", (aluno_id,))
+        aluno = cursor.fetchone()
+        if aluno:
+            return jsonify(dict(aluno)), 200
+        return jsonify({"mensagem": "Aluno nao encontrado"}), 404
+    finally:
+        conexao.close()
 
-    cursor.execute('SELECT * FROM alunos WHERE id = ?', (aluno_id,))
-    aluno = cursor.fetchone()
-    conexao.close()
 
-    if aluno:
-        return jsonify(dict(aluno)), 200
-    else:
-        return jsonify({'mensagem': 'Usuário não encontrado'}), 404
-
-# Atualizar um aluno
 def update_aluno(id_aluno, novo_aluno):
+    dados = _validar_aluno(novo_aluno)
+    if isinstance(dados, str):
+        return jsonify({"erro": dados}), 400
+
     conexao = conectar_banco()
     cursor = conexao.cursor()
+    try:
+        cursor.execute(
+            """
+            UPDATE alunos
+            SET nome = ?, idade = ?, turma_id = ?, nota_primeiro_semestre = ?,
+                nota_segundo_semestre = ?, media_final = ?
+            WHERE id = ?
+            """,
+            (
+                dados["nome"],
+                dados["idade"],
+                dados["turma_id"],
+                dados["nota_primeiro_semestre"],
+                dados["nota_segundo_semestre"],
+                dados["media_final"],
+                id_aluno,
+            ),
+        )
+        conexao.commit()
+        if cursor.rowcount == 0:
+            return jsonify({"mensagem": "Aluno nao encontrado"}), 404
+        return jsonify({"mensagem": "Aluno atualizado com sucesso"}), 200
+    except sqlite3.IntegrityError as e:
+        conexao.rollback()
+        return jsonify({"erro": "Turma informada nao existe", "detalhe": str(e)}), 409
+    finally:
+        conexao.close()
 
-    cursor.execute('''
-        UPDATE alunos
-        SET nome = ?, idade = ?, turma_id = ?, nota_primeiro_semestre = ?, nota_segundo_semestre = ?, media_final = ?
-        WHERE id = ?
-    ''', (
-        novo_aluno.get('nome'),
-        novo_aluno.get('idade'),
-        novo_aluno.get('turma_id'),
-        novo_aluno.get('nota_primeiro_semestre'),
-        novo_aluno.get('nota_segundo_semestre'),
-        (novo_aluno.get('nota_primeiro_semestre') + novo_aluno.get('nota_segundo_semestre')) / 2,
-        id_aluno
-    ))
 
-    conexao.commit()
-    conexao.close()
-
-    if cursor.rowcount > 0:
-        return jsonify({'mensagem': 'Aluno atualizado com sucesso'}), 200
-    else:
-        return jsonify({'mensagem': 'Usuário não encontrado'}), 404
-    
-# Deletar um aluno
 def deletar_aluno(aluno_id):
     conexao = conectar_banco()
     cursor = conexao.cursor()
-
-    cursor.execute('DELETE FROM alunos WHERE id = ?', (aluno_id,))
-    conexao.commit()
-    conexao.close()
-
-    if cursor.rowcount > 0:
-        return jsonify({'mensagem': 'Usuário removido com sucesso'})
-    else:
-        return jsonify({'mensagem': 'Usuário não encontrado'}), 404
+    try:
+        cursor.execute("DELETE FROM alunos WHERE id = ?", (aluno_id,))
+        conexao.commit()
+        if cursor.rowcount > 0:
+            return jsonify({"mensagem": "Aluno removido com sucesso"})
+        return jsonify({"mensagem": "Aluno nao encontrado"}), 404
+    finally:
+        conexao.close()

@@ -2,6 +2,12 @@ import os
 from flask import Flask
 
 
+banco_de_dados = os.environ.get(
+    "SQLITE_DB_PATH",
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "banco_de_dados.db"),
+)
+
+
 app = Flask(__name__)
 #app.config['HOST'] = '127.0.0.1'
 #app.config['HOST'] = 'localhost']

@@ -5,6 +5,7 @@ from models import model_aluno
 alunos_bp = Blueprint('alunos', __name__, url_prefix='/api/alunos')
 
 # GET /api/alunos - Lista todos os alunos
+@alunos_bp.route('', methods=['GET'])
 @alunos_bp.route('/', methods=['GET'])
 def listar_alunos():
     return model_aluno.lista_alunos()
@@ -15,6 +16,8 @@ def obter_aluno(aluno_id):
     return model_aluno.consulta_aluno(aluno_id)
 
 # POST /api/alunos - Cria um novo aluno
+@alunos_bp.route('', methods=['POST'])
+@alunos_bp.route('/', methods=['POST'])
 @alunos_bp.route('/alunos', methods=['POST'])
 def criar_aluno():
     aluno = request.get_json()
