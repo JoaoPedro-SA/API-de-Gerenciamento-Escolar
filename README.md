@@ -84,11 +84,11 @@ Para os métodos POST e PUT do aluno, enviar objetos json como o abaixo:
 
 | Método   | Rota               | Descrição                         |
 | -------- | ------------------ | --------------------------------- |
-| `GET`    | `/api/turmas`      | Retorna todos os professores      |
-| `GET`    | `/api/turmas/<id>` | Retorna um professor pelo ID      |
-| `POST`   | `/api/turmas/`     | Adiciona um novo professor        |
-| `PUT`    | `/api/turmas/<id>` | Atualiza os dados de um professor |
-| `DELETE` | `/api/turmas/<id>` | Exclui um professor               |
+| `GET`    | `/api/professores`      | Retorna todos os professores      |
+| `GET`    | `/api/professores/<id>` | Retorna um professor pelo ID      |
+| `POST`   | `/api/professores`      | Adiciona um novo professor        |
+| `PUT`    | `/api/professores/<id>` | Atualiza os dados de um professor |
+| `DELETE` | `/api/professores/<id>` | Exclui um professor               |
 
 ## ✅ Testando a API
 

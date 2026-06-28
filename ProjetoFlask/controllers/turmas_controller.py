@@ -11,8 +11,7 @@ def consulta_turmas():
 # GET /api/turma/<int:turma_id> - Consulta uma turma específica
 @turmas_bp.route('/api/turma/<int:turma_id>', methods=['GET'])
 def consulta_turma(turma_id):
-    request.args = {'id': turma_id}  
-    return model_turmas.apiTurma()
+    return model_turmas.apiTurma(turma_id)
 
 # POST /api/turma - Cria uma nova turma
 @turmas_bp.route('/api/turma', methods=['POST'])
@@ -21,10 +20,12 @@ def cria_turma():
 
 # PUT /api/turma - Atualiza uma turma existente
 @turmas_bp.route('/api/turma', methods=['PUT'])
-def atualiza_turma():
-    return model_turmas.apiTurma()
+@turmas_bp.route('/api/turma/<int:turma_id>', methods=['PUT'])
+def atualiza_turma(turma_id=None):
+    return model_turmas.apiTurma(turma_id)
 
 # DELETE /api/turma - Deleta uma turma existente
 @turmas_bp.route('/api/turma', methods=['DELETE'])
-def deleta_turma():  
-    return model_turmas.apiTurma()
+@turmas_bp.route('/api/turma/<int:turma_id>', methods=['DELETE'])
+def deleta_turma(turma_id=None):
+    return model_turmas.apiTurma(turma_id)

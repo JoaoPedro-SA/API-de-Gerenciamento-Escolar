@@ -8,16 +8,16 @@ def conectar_banco():
     return conexao
 
 # Função principal para gerenciar turmas
-def apiTurma():
+def apiTurma(turma_id=None):
     metodo = request.method
     conexao = conectar_banco()
     cursor = conexao.cursor()
 
     try:
         if metodo == "GET":
-                    if request.args.get('id'):
+                    id_turma = turma_id or request.args.get('id')
+                    if id_turma:
                         # Buscar turma por ID
-                        id_turma = request.args.get('id')
                         comando = "SELECT * FROM turmas WHERE id = ?"
                         turma = cursor.execute(comando, (id_turma,)).fetchone()
                         if turma:
@@ -64,7 +64,9 @@ def apiTurma():
 
 
         elif metodo == "PUT":  # Atualizar uma turma existente
-            id_turma = request.args.get('id')
+            id_turma = turma_id or request.args.get('id')
+            if not id_turma:
+                return jsonify({"mensagem": "ID da turma e obrigatorio"}), 400
             dados = request.get_json()
             cursor.execute(
                 "UPDATE turmas SET nome = ?, turno = ?, professor_id = ?, ativo = ? WHERE id = ?",
@@ -77,7 +79,9 @@ def apiTurma():
             return jsonify({"mensagem": "Turma atualizada com sucesso"}), 200
 
         elif metodo == "DELETE":  # Deletar uma turma
-            id_turma = request.args.get('id')
+            id_turma = turma_id or request.args.get('id')
+            if not id_turma:
+                return jsonify({"mensagem": "ID da turma e obrigatorio"}), 400
             cursor.execute("DELETE FROM turmas WHERE id = ?", (id_turma,))
             conexao.commit()
             if cursor.rowcount == 0:

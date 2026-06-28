@@ -1,6 +1,6 @@
 import requests
 
-BASE_URL = "https://new-api-flask2.onrender.com"  # URL de produção
+BASE_URL = "https://api-de-gerenciamento-escolar.onrender.com"
 
 def test_smoke():
     endpoints = [
