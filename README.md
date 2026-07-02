@@ -26,17 +26,19 @@ Este é um projeto Flask que fornece uma API RESTful para gerenciar alunos e tur
 ## 🔧 Instalação e Configuração
 
 1. **Clone este repositório:**
+
    ```sh
    git clone https://github.com/Alan-294/apis.git
    ```
 
-3. **Instale o Flask e o requiriments:**
+2. **Instale o Flask e o requiriments:**
+
    ```sh
    pip install Flask
-   pip install requests  
+   pip install requests
    ```
 
-5. **Inicie o servidor Flask:**
+3. **Inicie o servidor Flask:**
    ```sh
    python app.py
    ```
@@ -53,38 +55,40 @@ Este é um projeto Flask que fornece uma API RESTful para gerenciar alunos e tur
 | `POST`   | `/api/alunos`      | Adiciona um novo aluno   |
 | `PUT`    | `/api/alunos/<id>` | Atualiza um aluno        |
 | `DELETE` | `/api/alunos/<id>` | Exclui um aluno          |
+
 {
 
 Para os métodos POST e PUT do aluno, enviar objetos json como o abaixo:
- ```sh
+
+```sh
 {
-    "nome": "Jonas Padro",
-    "data_nascimento": "2008-01-01",
-    "nota_primeiro_semestre": 9.5,
-    "nota_segundo_semestre": 8.0,
-    "turma_id": 6
+   "nome": "Jonas Padro",
+   "data_nascimento": "2008-01-01",
+   "nota_primeiro_semestre": 9.5,
+   "nota_segundo_semestre": 8.0,
+   "turma_id": 6
 }
-  ```
+```
+
 ### 🎓 Turmas
 
-| Método   | Rota               | Descrição                 |
-| -------- | ------------------ | ------------------------- |
-| `GET`    | `/api/turma`       | Retorna todas as turmas   |
-| `GET`    | `/api/turma/<id>`  | Retorna uma turma pelo ID |
-| `POST`   | `/api/turma/`      | Adiciona uma nova turma   |
-| `PUT`    | `/api/turma/<id>`  | Atualiza uma turma        |
-| `DELETE` | `/api/turma/<id>`  | Exclui uma turma          |
-
+| Método   | Rota              | Descrição                 |
+| -------- | ----------------- | ------------------------- |
+| `GET`    | `/api/turma`      | Retorna todas as turmas   |
+| `GET`    | `/api/turma/<id>` | Retorna uma turma pelo ID |
+| `POST`   | `/api/turma/`     | Adiciona uma nova turma   |
+| `PUT`    | `/api/turma/<id>` | Atualiza uma turma        |
+| `DELETE` | `/api/turma/<id>` | Exclui uma turma          |
 
 ### 🎓 Professores
 
-| Método   | Rota               | Descrição                        |
-| -------- | ------------------ | ---------------------------------|
-| `GET`    | `/api/turmas`      | Retorna todos os professores     |
-| `GET`    | `/api/turmas/<id>` | Retorna um professor pelo ID     |
-| `POST`   | `/api/turmas/`     | Adiciona um novo professor       |
-| `PUT`    | `/api/turmas/<id>` | Atualiza os dados de um professor|
-| `DELETE` | `/api/turmas/<id>` | Exclui um professor              |
+| Método   | Rota               | Descrição                         |
+| -------- | ------------------ | --------------------------------- |
+| `GET`    | `/api/professores`      | Retorna todos os professores      |
+| `GET`    | `/api/professores/<id>` | Retorna um professor pelo ID      |
+| `POST`   | `/api/professores`      | Adiciona um novo professor        |
+| `PUT`    | `/api/professores/<id>` | Atualiza os dados de um professor |
+| `DELETE` | `/api/professores/<id>` | Exclui um professor               |
 
 ## ✅ Testando a API
 
@@ -95,5 +99,3 @@ python projetoFlask/testeAlunos.py
 python projetoFlask/testeTurma.py
 python projetoFlask/testeProfessores.py
 ```
-
-
